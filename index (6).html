@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagramming Pseudocode — From Recipe to Algorithm</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1612;
+    --rust: #C4501A;
+    --sage: #4A6741;
+    --warm-gray: #8C8279;
+    --pale-rust: #F0DDD5;
+    --pale-sage: #D8E5D4;
+    --pale-gold: #E8DFC0;
+    --border: #D4C9B8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 3rem 4rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+  }
+
+  .header-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .header-subtitle {
+    font-size: 0.8rem;
+    color: var(--warm-gray);
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 4rem 6rem;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin-top: 5rem;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-bottom: 0.4rem;
+  }
+
+  .section-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 400;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: -1rem;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.6rem;
+  }
+
+  h3 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    color: var(--ink);
+  }
+
+  p { margin-bottom: 0.9rem; font-size: 0.95rem; }
+
+  /* ── INTRO CARD ── */
+  .intro-card {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 2.5rem 3rem;
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .intro-card::before {
+    content: '{ }';
+    position: absolute;
+    right: 2rem;
+    bottom: -1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8rem;
+    color: rgba(255,255,255,0.04);
+    pointer-events: none;
+  }
+
+  .intro-card h3 { color: var(--pale-gold); margin-bottom: 0.5rem; font-size: 0.75rem; }
+  .intro-card p { font-size: 0.88rem; color: rgba(245,240,232,0.8); margin-bottom: 0; }
+  .intro-card ul { list-style: none; }
+  .intro-card ul li {
+    font-size: 0.85rem;
+    color: rgba(245,240,232,0.8);
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+  .intro-card ul li::before {
+    content: '→';
+    color: var(--rust);
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+
+  /* ── SHAPE REFERENCE GRID ── */
+  .shape-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .shape-card {
+    border: 1px solid var(--border);
+    padding: 1.5rem 1.2rem;
+    background: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .shape-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .shape-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 70px;
+    margin-bottom: 1rem;
+  }
+
+  /* Shapes */
+  .s-oval {
+    width: 110px; height: 46px;
+    border-radius: 50px;
+    border: 2.5px solid var(--rust);
+    background: var(--pale-rust);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--rust);
+    font-weight: 500;
+  }
+
+  .s-rect {
+    width: 110px; height: 46px;
+    border: 2.5px solid var(--ink);
+    background: var(--pale-gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .s-diamond {
+    width: 54px; height: 54px;
+    border: 2.5px solid var(--sage);
+    background: var(--pale-sage);
+    transform: rotate(45deg);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .s-diamond span {
+    transform: rotate(-45deg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--sage);
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .s-parallelogram {
+    width: 110px; height: 46px;
+    border: 2.5px solid #7A5C9B;
+    background: #EDE5F5;
+    transform: skewX(-15deg);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .s-parallelogram span {
+    transform: skewX(15deg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: #7A5C9B;
+    font-weight: 500;
+  }
+
+  .s-rounded-rect {
+    width: 110px; height: 46px;
+    border-radius: 8px;
+    border: 2.5px solid #2A6B9B;
+    background: #D5E8F5;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: #2A6B9B;
+    font-weight: 500;
+  }
+
+  .s-double-rect {
+    width: 110px; height: 46px;
+    border: 2.5px solid var(--warm-gray);
+    background: #EEE9E2;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--warm-gray);
+    font-weight: 500;
+    position: relative;
+  }
+  .s-double-rect::before {
+    content: '';
+    position: absolute;
+    inset: -5px -5px auto auto;
+    width: 12px;
+    height: 100%;
+    border: 2.5px solid var(--warm-gray);
+    background: #EEE9E2;
+  }
+
+  .shape-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .shape-culinary {
+    font-size: 0.78rem;
+    color: var(--rust);
+    font-style: italic;
+    margin-bottom: 0.25rem;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .shape-desc { font-size: 0.78rem; color: var(--warm-gray); margin: 0; }
+
+  /* ── COLOR KEY ── */
+  .color-key {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: 1px solid var(--border);
+  }
+
+  .color-swatch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── ARROW SECTION ── */
+  .arrow-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .arrow-card {
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    background: white;
+  }
+
+  .arrow-visual {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .arrow-line {
+    height: 2.5px;
+    flex: 1;
+    background: var(--ink);
+    position: relative;
+  }
+
+  .arrow-line::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid var(--ink);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+  }
+
+  .arrow-dashed {
+    background: none;
+    border-top: 2.5px dashed var(--warm-gray);
+  }
+  .arrow-dashed::after { border-left-color: var(--warm-gray); }
+
+  .arrow-thick {
+    height: 4px;
+    background: var(--rust);
+  }
+  .arrow-thick::after { border-left-color: var(--rust); }
+
+  .arrow-branch-y {
+    color: var(--sage);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.2rem;
+    padding: 0 1rem;
+  }
+  .arrow-branch-n {
+    color: var(--rust);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.2rem;
+    padding: 0 1rem;
+  }
+
+  .arrow-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .arrow-use { font-size: 0.8rem; color: var(--warm-gray); margin: 0; }
+  .arrow-example {
+    font-size: 0.78rem;
+    color: var(--rust);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+  }
+
+  /* ── RULE BOX ── */
+  .rule-box {
+    border-left: 4px solid var(--rust);
+    padding: 1rem 1.5rem;
+    background: var(--pale-rust);
+    margin: 1.5rem 0;
+    font-size: 0.88rem;
+  }
+  .rule-box strong {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    color: var(--rust);
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── STEP-BY-STEP ── */
+  .steps-container {
+    margin-top: 2rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 39px;
+    top: 75px;
+    width: 2px;
+    height: calc(100% - 50px);
+    background: var(--border);
+  }
+
+  .step-num {
+    width: 80px;
+    height: 80px;
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    background: white;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-body { padding-top: 0.8rem; }
+  .step-body h3 { font-size: 0.9rem; margin-bottom: 0.6rem; }
+  .step-body p { font-size: 0.88rem; }
+
+  .code-block {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    padding: 1.2rem 1.5rem;
+    margin: 0.8rem 0;
+    line-height: 1.9;
+    border-left: 3px solid var(--rust);
+  }
+
+  .code-block .comment { color: var(--warm-gray); }
+  .code-block .keyword { color: #9ECBFF; }
+  .code-block .value { color: #ADDB67; }
+  .code-block .shape { color: #F0C06A; }
+
+  /* ── LIVE DIAGRAM ── */
+  .diagram-wrap {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 3rem 2rem;
+    margin-top: 2rem;
+    overflow-x: auto;
+  }
+
+  .diagram-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--warm-gray);
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .flowchart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 600px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* Flowchart nodes */
+  .fc-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .fc-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 400;
+    cursor: default;
+    transition: transform 0.15s;
+    padding: 0 1rem;
+  }
+
+  .fc-box:hover { transform: scale(1.02); }
+
+  .fc-start, .fc-end {
+    width: 180px; height: 50px;
+    border-radius: 50px;
+    border: 2.5px solid var(--rust);
+    background: var(--pale-rust);
+    color: var(--rust);
+    font-weight: 500;
+  }
+
+  .fc-process {
+    width: 280px; height: 52px;
+    border: 2.5px solid var(--ink);
+    background: var(--pale-gold);
+    color: var(--ink);
+  }
+
+  .fc-io {
+    width: 280px; height: 52px;
+    border: 2.5px solid #7A5C9B;
+    background: #EDE5F5;
+    color: #7A5C9B;
+    transform: skewX(-12deg);
+  }
+
+  .fc-io span { display: block; transform: skewX(12deg); }
+
+  .fc-decision {
+    width: 0; height: 0;
+    border: none;
+    padding: 0;
+    position: relative;
+  }
+
+  .diamond-wrap {
+    width: 160px; height: 160px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .diamond-bg {
+    position: absolute;
+    width: 115px; height: 115px;
+    border: 2.5px solid var(--sage);
+    background: var(--pale-sage);
+    transform: rotate(45deg);
+  }
+
+  .diamond-text {
+    position: relative;
+    z-index: 1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--sage);
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.4;
+    max-width: 90px;
+  }
+
+  /* Arrows */
+  .fc-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 36px;
+    position: relative;
+  }
+
+  .fc-arrow .line {
+    width: 2px;
+    flex: 1;
+    background: var(--ink);
+  }
+
+  .fc-arrow .head {
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid var(--ink);
+  }
+
+  .fc-arrow .label {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--warm-gray);
+  }
+
+  /* Decision branch layout */
+  .branch-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    gap: 0;
+    margin-top: -10px;
+  }
+
+  .branch-left, .branch-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 260px;
+  }
+
+  .branch-h-line {
+    width: 100%;
+    height: 2px;
+    background: var(--ink);
+    margin-top: 10px;
+  }
+
+  .branch-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--warm-gray);
+    margin: 4px 0;
+  }
+
+  /* Sub-loop box */
+  .fc-loop {
+    width: 250px; height: 48px;
+    border-radius: 8px;
+    border: 2.5px solid #2A6B9B;
+    background: #D5E8F5;
+    color: #2A6B9B;
+  }
+
+  /* Merge line */
+  .merge-line {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 20px;
+  }
+
+  .merge-line .vline {
+    width: 2px;
+    background: var(--ink);
+    height: 100%;
+  }
+
+  /* ── VISUAL RULES TABLE ── */
+  .rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 0.82rem;
+  }
+
+  .rules-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.7rem 1rem;
+    border-bottom: 2px solid var(--ink);
+    text-align: left;
+    background: var(--cream);
+  }
+
+  .rules-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .rules-table tr:hover td { background: rgba(255,255,255,0.6); }
+
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .tag-do { background: var(--pale-sage); color: var(--sage); }
+  .tag-dont { background: var(--pale-rust); color: var(--rust); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 2px solid var(--ink);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--warm-gray);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    header, main, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    header { grid-template-columns: 1fr; }
+    .intro-card { grid-template-columns: 1fr; }
+    .arrow-grid { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 60px 1fr; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <div>
+    <p class="header-tag">Visual Communications — Computational Thinking</p>
+    <h1>Diagramming Pseudocode<br>from a Culinary <em>Recipe</em></h1>
+  </div>
+  <div class="header-subtitle">
+    ARCH 012B · Visual Communications II<br>
+    From Kitchen Logic → Visual Algorithm<br>
+    Flowchart Notation Reference
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══════════ INTRO ═══════════ -->
+  <div class="intro-card">
+    <div>
+      <h3>What Is a Pseudocode Diagram?</h3>
+      <p>A pseudocode diagram (flowchart) is a visual representation of a process — the logic made visible. It maps every decision, action, and data flow using standardized shapes connected by directed arrows. Unlike written code, it is language-agnostic and readable by anyone.</p>
+      <p>A recipe is the perfect starting structure: it has ingredients (inputs), steps (processes), conditional judgments ("if not done, continue"), and a finished dish (output).</p>
+    </div>
+    <div>
+      <h3>Core Concepts to Master</h3>
+      <ul>
+        <li>Every process has exactly one START and one END</li>
+        <li>Shapes carry specific semantic meaning — don't improvise</li>
+        <li>Arrows show direction and control flow, never reversed arbitrarily</li>
+        <li>Decisions always branch into exactly two paths: YES and NO</li>
+        <li>All paths must eventually reconnect or reach END</li>
+        <li>Loops require a re-entry arrow pointing backward</li>
+        <li>Keep each box to one atomic action or decision</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 1 — SHAPES ═══════════ -->
+  <div class="section">
+    <span class="section-number">01</span>
+    <div class="section-label">Vocabulary</div>
+    <h2>Shape Reference — What Each Box Means</h2>
+    <p>Each shape in a flowchart is a symbol with a specific, non-negotiable meaning. Using the correct shape is as important as using the correct notation in architectural drawing.</p>
+
+    <div class="shape-grid">
+
+      <div class="shape-card">
+        <div class="shape-visual"><div class="s-oval">START / END</div></div>
+        <div class="shape-name">Oval / Terminator</div>
+        <div class="shape-culinary">"Begin: Gather your mise en place"</div>
+        <p class="shape-desc">Marks the single entry point (START) and all exit points (END) of the algorithm. Rounded edges signal the boundary of the process.</p>
+      </div>
+
+      <div class="shape-card">
+        <div class="shape-visual"><div class="s-rect">PROCESS</div></div>
+        <div class="shape-name">Rectangle / Process</div>
+        <div class="shape-culinary">"Dice the onion into 5mm cubes"</div>
+        <p class="shape-desc">Any action, calculation, or transformation. The workhorse of the diagram. Should describe one atomic operation — one verb, one object.</p>
+      </div>
+
+      <div class="shape-card">
+        <div class="shape-visual">
+          <div class="diamond-bg" style="position:relative;width:60px;height:60px;border:2.5px solid #4A6741;background:#D8E5D4;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;">
+            <span style="transform:rotate(-45deg);font-family:'IBM Plex Mono',monospace;font-size:0.5rem;color:#4A6741;text-align:center;">YES/NO ?</span>
+          </div>
+        </div>
+        <div class="shape-name">Diamond / Decision</div>
+        <div class="shape-culinary">"Is the sauce reduced by half?"</div>
+        <p class="shape-desc">A binary question with exactly two exits: YES (TRUE) and NO (FALSE). Never use for multi-way branches without chaining multiple diamonds.</p>
+      </div>
+
+      <div class="shape-card">
+        <div class="shape-visual"><div class="s-parallelogram"><span>INPUT / OUTPUT</span></div></div>
+        <div class="shape-name">Parallelogram / I/O</div>
+        <div class="shape-culinary">"Add 2 cups of flour" / "Serve the dish"</div>
+        <p class="shape-desc">Data entering (ingredients/measurements) or leaving (final output) the system. The skew distinguishes it from process boxes at a glance.</p>
+      </div>
+
+      <div class="shape-card">
+        <div class="shape-visual"><div class="s-rounded-rect">SUB-PROCESS</div></div>
+        <div class="shape-name">Rounded Rectangle</div>
+        <div class="shape-culinary">"Make the roux" (a whole sub-recipe)</div>
+        <p class="shape-desc">A predefined sub-process or function — a named block of steps defined elsewhere. Use this when a step is itself a complete algorithm.</p>
+      </div>
+
+      <div class="shape-card">
+        <div class="shape-visual"><div class="s-double-rect">CALLED PROCESS</div></div>
+        <div class="shape-name">Rectangle with Ears</div>
+        <div class="shape-culinary">"Refer to base stock recipe"</div>
+        <p class="shape-desc">Indicates a call to an external procedure. The vertical bars on the sides signal that control leaves and returns. Common in modular recipe systems.</p>
+      </div>
+
+    </div>
+
+    <!-- Color key -->
+    <div class="color-key">
+      <strong style="font-weight:500;">COLOR ASSIGNMENTS:</strong>
+      <span class="color-swatch"><span class="swatch" style="background:#F0DDD5;border:1.5px solid #C4501A;"></span> Start / End</span>
+      <span class="color-swatch"><span class="swatch" style="background:#E8DFC0;border:1.5px solid #1A1612;"></span> Process</span>
+      <span class="color-swatch"><span class="swatch" style="background:#D8E5D4;border:1.5px solid #4A6741;"></span> Decision</span>
+      <span class="color-swatch"><span class="swatch" style="background:#EDE5F5;border:1.5px solid #7A5C9B;"></span> Input / Output</span>
+      <span class="color-swatch"><span class="swatch" style="background:#D5E8F5;border:1.5px solid #2A6B9B;"></span> Sub-Process</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 2 — ARROWS ═══════════ -->
+  <div class="section">
+    <span class="section-number">02</span>
+    <div class="section-label">Connectors</div>
+    <h2>Arrow Types — How to Connect Boxes</h2>
+    <p>Arrows are not decoration — they encode direction, condition, and flow priority. Every arrow must be directed (have an arrowhead). No bidirectional arrows in standard flowcharts.</p>
+
+    <div class="arrow-grid">
+
+      <div class="arrow-card">
+        <div class="arrow-visual">
+          <div class="arrow-line" style="background:var(--ink);"></div>
+        </div>
+        <div class="arrow-name">Standard Flow Arrow</div>
+        <p class="arrow-use">Default connector between any two sequential steps. Solid line, single arrowhead. Flows top → bottom or left → right.</p>
+        <p class="arrow-example">"Heat pan → Add oil → Add onions"</p>
+      </div>
+
+      <div class="arrow-card">
+        <div class="arrow-visual" style="gap:0.5rem;">
+          <span class="arrow-branch-y">Y</span>
+          <div class="arrow-line" style="background:var(--sage);"></div>
+          <div style="width:2px;"></div>
+          <div class="arrow-line" style="background:var(--rust);"></div>
+          <span class="arrow-branch-n">N</span>
+        </div>
+        <div class="arrow-name">Decision Branch — YES / NO</div>
+        <p class="arrow-use">Always label both exits from a diamond. YES (green/right) and NO (red/left) paths. Label must sit near the arrowhead, not the diamond.</p>
+        <p class="arrow-example">"Is pasta al dente? Y → drain / N → continue boiling"</p>
+      </div>
+
+      <div class="arrow-card">
+        <div class="arrow-visual">
+          <div class="arrow-line arrow-dashed"></div>
+        </div>
+        <div class="arrow-name">Dashed / Conditional Arrow</div>
+        <p class="arrow-use">Optional path or dependency. Use when a step <em>may</em> occur depending on context but isn't part of the main flow. Rare in basic diagrams.</p>
+        <p class="arrow-example">"Optionally: add truffle oil before serving"</p>
+      </div>
+
+      <div class="arrow-card">
+        <div class="arrow-visual">
+          <div class="arrow-line arrow-thick"></div>
+        </div>
+        <div class="arrow-name">Loop-Back Arrow</div>
+        <p class="arrow-use">Returns flow to a previous step. Always drawn as a curved or angled path on the <em>outside</em> of the main flow column — never crossing other arrows.</p>
+        <p class="arrow-example">"Taste → Adjust seasoning → Taste again"</p>
+      </div>
+
+    </div>
+
+    <div class="rule-box">
+      <strong>Arrow Routing Rules</strong>
+      All primary flow goes vertically top-to-bottom or left-to-right. Loop-back arrows travel along the outside edge of your diagram. When arrows must cross, draw a small bridge arc over one line. Label every decision arrow. Label every loop-back with the condition that keeps it looping (e.g. "not done").
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 3 — STEP BY STEP ═══════════ -->
+  <div class="section">
+    <span class="section-number">03</span>
+    <div class="section-label">Method</div>
+    <h2>Step-by-Step: Recipe → Pseudocode Diagram</h2>
+    <p>We will convert a simple pasta recipe into a complete flowchart. Follow each step before moving to the next — the diagram only works when built in order.</p>
+
+    <div class="steps-container">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Read the Entire Recipe First — Identify All Actions</h3>
+          <p>Before drawing a single box, read the recipe completely and annotate every <strong>verb</strong>. Each verb is a potential process node. Underline conditional phrases ("if", "until", "while", "check") — those become decision diamonds.</p>
+          <div class="code-block">
+<span class="comment">// EXAMPLE RECIPE — Spaghetti Aglio e Olio</span>
+<span class="value">1. </span>Boil salted water
+<span class="value">2. </span>Cook spaghetti <span class="keyword">until</span> al dente   <span class="comment">← DECISION</span>
+<span class="value">3. </span>Meanwhile, slice garlic thin
+<span class="value">4. </span>Toast garlic in olive oil <span class="keyword">until</span> golden  <span class="comment">← DECISION</span>
+<span class="value">5. </span>Add chili flakes
+<span class="value">6. </span>Reserve pasta water
+<span class="value">7. </span>Drain pasta
+<span class="value">8. </span>Toss pasta with oil + water
+<span class="value">9. </span>Taste → adjust salt    <span class="comment">← DECISION</span>
+<span class="value">10.</span> Plate and serve
+          </div>
+          <p style="font-size:0.82rem;color:var(--warm-gray);">Annotation result: 7 process nodes, 3 decision diamonds, 2 parallel tracks (pasta + garlic happening simultaneously).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Write the Pseudocode in Plain Language</h3>
+          <p>Convert your annotated recipe into structured pseudocode — a formalized plain-English logic script. Use indentation to show nesting. This is your blueprint before you draw.</p>
+          <div class="code-block">
+<span class="keyword">BEGIN</span> SpaghetttiAglioeOlio
+
+  <span class="keyword">INPUT:</span> spaghetti, garlic, olive_oil, chili, salt, pasta_water
+  
+  boilWater(salt)
+  cookPasta(spaghetti)
+  
+  <span class="keyword">WHILE</span> pasta.texture != "al dente" <span class="keyword">DO</span>
+    continueCooking(pasta)
+  <span class="keyword">END WHILE</span>
+  
+  <span class="comment">// Parallel sub-process (garlic track)</span>
+  sliceGarlic()
+  toastInOil(garlic, olive_oil)
+  
+  <span class="keyword">WHILE</span> garlic.color != "golden" <span class="keyword">DO</span>
+    continueToasting(garlic)
+  <span class="keyword">END WHILE</span>
+  
+  addChiliFLakes()
+  reservePastaWater()
+  drainPasta()
+  toss(pasta, oil_mixture, pasta_water)
+  
+  taste()
+  <span class="keyword">IF</span> seasoning != "balanced" <span class="keyword">THEN</span>
+    adjustSalt()
+  <span class="keyword">END IF</span>
+  
+  <span class="keyword">OUTPUT:</span> plate(dish)
+
+<span class="keyword">END</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Sketch the Skeleton — Start with START and END</h3>
+          <p>On paper or in your diagramming tool, place your START oval at the top center. Place your END oval at the bottom. Draw a single vertical center line between them — this is your spine. Everything connects to this axis.</p>
+          <div class="rule-box">
+            <strong>Spatial Rule</strong>
+            Leave generous vertical spacing between nodes — at minimum 1.5× the height of your largest box. Cramped diagrams are unreadable. In professional practice, diagram width rarely exceeds a single screen column.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Place Process Boxes — One Action Per Box</h3>
+          <p>Working down from START, add a rectangle for each sequential action. Write the text in the imperative mood: "Boil water", "Slice garlic". Each box should be the same width. Never write more than one action in a single rectangle — split it if necessary.</p>
+          <div class="rule-box">
+            <strong>Text Rule</strong>
+            Box labels should be concise (3–7 words), action-first. Never use passive voice inside a process box. Bad: "The water is boiled." Good: "Boil salted water."
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Insert Decision Diamonds at Each Conditional</h3>
+          <p>Every "WHILE", "IF", or "UNTIL" in your pseudocode becomes a diamond. The question inside must be answerable with YES or NO only. Place the YES exit going down (continuing the main flow) and the NO exit going left or right (to a loop-back or alternate path).</p>
+          <div class="code-block">
+<span class="shape">DIAMOND:</span>  "Al dente?"
+  <span class="value">YES →</span> continue to next step (drain pasta)
+  <span class="value">NO  →</span> loop back to "Continue cooking" rectangle
+          </div>
+          <p style="margin-top:0.8rem;font-size:0.85rem;">The loop-back arrow travels outside the right edge of your column, curves back up, and re-enters the top of the "Continue cooking" box.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>Draw Parallel Tracks for Simultaneous Processes</h3>
+          <p>In cooking, two processes often run in parallel (boiling pasta while making the sauce). In a diagram, parallel tracks are shown by splitting the flow into two columns using a horizontal bar (or just two separate vertical columns) and rejoining before the next shared step.</p>
+          <div class="code-block">
+<span class="comment">// SPLIT at: "While pasta cooks..."</span>
+<span class="shape">[horizontal fork bar]</span>
+  <span class="value">LEFT COLUMN:</span>  cookPasta → [Decision: al dente?] → drain
+  <span class="value">RIGHT COLUMN:</span> sliceGarlic → toastInOil → [Decision: golden?] → addChili
+<span class="shape">[horizontal join bar]</span>
+<span class="comment">// MERGE at: "Combine both"</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h3>Add Input / Output Parallelograms</h3>
+          <p>Place a parallelogram just after START to declare all ingredients (inputs). Place another at the END sequence to mark the "Serve dish" output. If the recipe has mid-process data (e.g., "measure reserved pasta water"), add an I/O parallelogram at that point too.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <h3>Label All Arrows — Review Every Connection</h3>
+          <p>Walk every arrow in your diagram and verify: (a) it has an arrowhead, (b) it points in the correct direction, (c) every diamond exit is labeled YES/NO. Trace every possible path from START to END to confirm it terminates. Any path that doesn't reach END is a logical error — fix it before finalizing.</p>
+          <div class="rule-box">
+            <strong>Final Checklist</strong>
+            ① Exactly one START and one END · ② Every shape uses the correct type · ③ Every arrow is directed · ④ Every diamond has exactly two labeled exits · ⑤ All loops have a termination condition · ⑥ No paths lead to dead ends · ⑦ Parallel tracks fully merge before END
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 4 — LIVE DIAGRAM ═══════════ -->
+  <div class="section">
+    <span class="section-number">04</span>
+    <div class="section-label">Reference Output</div>
+    <h2>Complete Diagram — Spaghetti Aglio e Olio</h2>
+    <p>Below is the finished flowchart corresponding to the pseudocode built in Section 03. Study the spatial composition, loop-back routing, and parallel track merge. Hover over any node to highlight it.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">FLOWCHART · SPAGHETTI AGLIO E OLIO · PSEUDOCODE DIAGRAM</div>
+
+      <div class="flowchart">
+
+        <!-- START -->
+        <div class="fc-node">
+          <div class="fc-box fc-start">START</div>
+        </div>
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- INPUT -->
+        <div class="fc-node">
+          <div class="fc-box fc-io" style="width:300px;"><span>INPUT: spaghetti, garlic, oil, salt</span></div>
+        </div>
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- PROCESS: Boil water -->
+        <div class="fc-node">
+          <div class="fc-box fc-process">Boil salted water</div>
+        </div>
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- PROCESS: Cook pasta + start garlic track label -->
+        <div class="fc-node">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--warm-gray);margin-bottom:4px;letter-spacing:0.1em;">PARALLEL TRACKS BEGIN</div>
+        </div>
+
+        <!-- Parallel row -->
+        <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:start;width:100%;max-width:600px;">
+
+          <!-- LEFT: pasta track -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--warm-gray);margin-bottom:6px;">PASTA TRACK</div>
+            <div class="fc-box fc-process" style="width:220px;">Cook spaghetti</div>
+            <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+            <!-- Decision: al dente? -->
+            <div class="diamond-wrap" style="width:130px;height:130px;">
+              <div class="diamond-bg" style="width:95px;height:95px;border:2.5px solid #4A6741;background:#D8E5D4;position:absolute;transform:rotate(45deg);"></div>
+              <div class="diamond-text">Al dente?</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:0;width:220px;position:relative;">
+              <!-- YES arrow down -->
+              <div style="display:flex;flex-direction:column;align-items:center;flex:1;margin-left:40px;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--sage);">YES</div>
+                <div class="fc-arrow" style="height:24px;"><div class="line"></div><div class="head"></div></div>
+              </div>
+              <!-- NO arrow with loop label -->
+              <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--rust);">NO → loop</div>
+                <div style="width:2px;height:20px;background:var(--rust);"></div>
+              </div>
+            </div>
+            <div class="fc-box fc-process" style="width:220px;">Drain pasta + reserve water</div>
+          </div>
+
+          <!-- CENTER spacer -->
+          <div style="display:flex;align-items:center;justify-content:center;padding-top:80px;">
+            <div style="width:1px;background:var(--border);height:200px;"></div>
+          </div>
+
+          <!-- RIGHT: garlic track -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--warm-gray);margin-bottom:6px;">GARLIC TRACK</div>
+            <div class="fc-box fc-process" style="width:220px;">Slice garlic thin</div>
+            <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+            <div class="fc-box fc-process" style="width:220px;">Toast garlic in olive oil</div>
+            <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+            <!-- Decision: golden? -->
+            <div class="diamond-wrap" style="width:130px;height:130px;">
+              <div class="diamond-bg" style="width:95px;height:95px;border:2.5px solid #4A6741;background:#D8E5D4;position:absolute;transform:rotate(45deg);"></div>
+              <div class="diamond-text">Garlic golden?</div>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--sage);margin:4px 0;">YES ↓</div>
+            <div class="fc-box fc-process" style="width:220px;">Add chili flakes</div>
+          </div>
+        </div>
+
+        <!-- Merge label -->
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--warm-gray);margin-top:16px;margin-bottom:4px;letter-spacing:0.1em;">PARALLEL TRACKS MERGE</div>
+
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- PROCESS: Toss -->
+        <div class="fc-node">
+          <div class="fc-box fc-process">Toss pasta with oil mixture + water</div>
+        </div>
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- PROCESS: Taste -->
+        <div class="fc-node">
+          <div class="fc-box fc-process">Taste seasoning</div>
+        </div>
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- Decision: balanced? -->
+        <div class="fc-node">
+          <div class="diamond-wrap">
+            <div class="diamond-bg"></div>
+            <div class="diamond-text">Balanced?</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0;width:300px;">
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;margin-left:30px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--sage);">YES</div>
+              <div class="fc-arrow" style="height:20px;"><div class="line"></div><div class="head"></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;flex:1;padding-right:10px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--rust);">NO</div>
+              <div style="width:60px;height:2px;background:var(--rust);"></div>
+              <div style="width:2px;height:30px;background:var(--rust);margin-left:auto;"></div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--rust);text-align:right;">↑ adjust salt → re-taste</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OUTPUT -->
+        <div class="fc-node">
+          <div class="fc-box fc-io" style="width:260px;"><span>OUTPUT: Plate and serve dish</span></div>
+        </div>
+        <div class="fc-arrow"><div class="line"></div><div class="head"></div></div>
+
+        <!-- END -->
+        <div class="fc-node">
+          <div class="fc-box fc-end">END</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 5 — DO / DON'T ═══════════ -->
+  <div class="section">
+    <span class="section-number">05</span>
+    <div class="section-label">Quality Control</div>
+    <h2>Visual Design Rules — Do's and Don'ts</h2>
+    <p>A flowchart is a communication tool. These principles separate a legible professional diagram from a confusing one.</p>
+
+    <table class="rules-table">
+      <thead>
+        <tr>
+          <th>Element</th>
+          <th><span class="tag tag-do">DO</span></th>
+          <th><span class="tag tag-dont">AVOID</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Box Size</strong></td>
+          <td>Keep all process boxes the same width. Height adjusts to text.</td>
+          <td>Varying box widths arbitrarily — it implies significance that isn't there.</td>
+        </tr>
+        <tr>
+          <td><strong>Alignment</strong></td>
+          <td>Center-align all boxes on a single vertical axis for the main flow.</td>
+          <td>Scattering boxes across the canvas with no structural grid.</td>
+        </tr>
+        <tr>
+          <td><strong>Arrow Length</strong></td>
+          <td>Keep arrows short and direct. Long arrows signal poor layout — rearrange the diagram instead.</td>
+          <td>Crossing arrows. If unavoidable, use a bridge arc to indicate non-connection.</td>
+        </tr>
+        <tr>
+          <td><strong>Text</strong></td>
+          <td>Use one consistent sans-serif or monospace typeface. Sentence case. 3–7 words per box.</td>
+          <td>Full sentences, passive voice, or abbreviations that aren't established conventions.</td>
+        </tr>
+        <tr>
+          <td><strong>Color</strong></td>
+          <td>Assign color by shape type (semantic). Use a maximum of 4–5 colors. Always include a legend.</td>
+          <td>Random or decorative color use. Never color the same shape type differently within one diagram.</td>
+        </tr>
+        <tr>
+          <td><strong>Loop Routing</strong></td>
+          <td>Route loop-back arrows along the outer edge of the column, always on the same side.</td>
+          <td>Loop-back arrows going through the center of the diagram or crossing primary flow arrows.</td>
+        </tr>
+        <tr>
+          <td><strong>Density</strong></td>
+          <td>Leave 1–2× box-height of white space between each node. Let the diagram breathe.</td>
+          <td>Compressing the diagram to fit a page — use multiple pages or a legend for large processes.</td>
+        </tr>
+        <tr>
+          <td><strong>Decision Labels</strong></td>
+          <td>Always label both exits of every diamond. Place label near the arrowhead.</td>
+          <td>Unlabeled decision exits or labels placed at the diamond body instead of the arrow.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  <span>Visual Communications II · ARCH 012B</span>
+  <span>Pseudocode Diagramming Reference</span>
+  <span>From Recipe → Algorithm</span>
+</footer>
+
+</body>
+</html>
